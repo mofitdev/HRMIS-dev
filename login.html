@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html lang="en-us" id="lock-page">
+<head>
+    <meta charset="utf-8">
+    <title>HRMIS | Нэвтрэх</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-production.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/smartadmin-skins.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/demo.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/lockscreen.min.css">
+    <link rel="shortcut icon" href="../img/favicon.ico" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+</head>
+<body>
+    <div id="main" role="main">
+        <form id="login-form" class="smart-form lockscreen animated flipInY" action="index.aspx">
+            <div class="logo">
+                <h1 class="semi-bold"><img src="../img/logo-o.png" alt="" /> HRMIS <span style="font-size:17px;">Хүний нөөцийн удирдлагын мэдээллийн систем</span></h1>
+            </div>
+            <div>
+                <img src="../img/mof-icon.png" alt="" width="120" height="120" />
+                <div>
+                    <h1><i class="fa fa-user fa-3x text-muted air air-top-right hidden-mobile"></i><small style="padding:0;">&nbsp;Нэвтрэх хэсэг</small></h1>
+                    <fieldset style="padding: 5px 0 0 0;">
+                        <section style="margin: 0 0 10px 0;">
+                            <label class="input">
+                                <i class="icon-append fa fa-user"></i>
+                                <input id="loginUsername" type="text" name="loginUsername" placeholder="Нэвтрэх нэр">
+                                <b class="tooltip tooltip-top-right"><i class="fa fa-user txt-color-teal"></i> Нэвтрэх нэр оруулна уу</b>
+                            </label>
+                        </section>
+                        <section style="margin: 0 0 10px 0;">
+                            <label class="input">
+                                <i class="icon-append fa fa-lock"></i>
+                                <input id="loginPassword" type="password" name="loginPassword" placeholder="Нууц үг">
+                                <b class="tooltip tooltip-top-right"><i class="fa fa-lock txt-color-teal"></i> Нууц үгээ оруулна уу</b>
+                            </label>
+                        </section>
+                        <section style="margin: 0;">
+                            <button id="login-btn" class="btn btn-success btn-block" type="submit" style="height:30px;">Нэвтрэх</button>
+                        </section>
+                        <section id="errSection" style="margin: 5px 0 0 0;"></section>
+                    </fieldset>
+                </div>
+            </div>
+            <p class="font-xs margin-top-5">
+                Монгол Улсын Сангийн Яам © 2015.
+            </p>
+        </form>
+    </div>
+    <script src="js/plugin/pace/pace.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script> if (!window.jQuery) { document.write('<script src="js/libs/jquery-2.1.1.min.js"><\/script>'); } </script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script> if (!window.jQuery.ui) { document.write('<script src="js/libs/jquery-ui-1.10.3.min.js"><\/script>'); } </script>
+    <script src="js/app.config.js"></script>
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+    <script src="js/plugin/jquery-validate/jquery.validate.min.js"></script>
+    <script src="js/plugin/masked-input/jquery.maskedinput.min.js"></script>
+    <script src="js/app.min.js"></script>
+    <script type="text/javascript">
+        runAllForms();
+        $(function () {
+            $("#login-form").validate({
+                rules: {
+                    loginUsername: {
+                        required: true
+                    },
+                    loginPassword: {
+                        required: true
+                    }
+                },
+                messages: {
+                    loginUsername: {
+                        required: 'Нэвтрэх нэр оруулна уу'
+                    },
+                    loginPassword: {
+                        required: 'Нууц үг оруулна уу'
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element.parent());
+                },
+                submitHandler: function (form) {
+                    $("#login-btn").html('<i class="fa fa-refresh fa-spin"></i> Нэвтрэх');
+                    $("#login-btn").prop('disabled', true);
+                    $.ajax({
+                        type: "POST",
+                        url: "../ws.aspx/CheckLogin",
+                        data: '{username:"' + $.trim($('#loginUsername').val()) + '", pass:"' + $.trim($('#loginPassword').val()) + '"}',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (msg) {
+                            $('#errSection').html('');
+                            $("#login-btn").html('Нэвтрэх');
+                            $("#login-btn").prop('disabled', false);
+                            if (window.location.hash != '') window.location = '../' + window.location.hash;
+                            else window.location = '../#pg/dashboard.aspx?t=f';
+                        },
+                        failure: function (response) {
+                            alert(response.d);
+                        },
+                        error: function (xhr, status, error) {
+                            var err = eval("(" + xhr.responseText + ")");
+                            $('#errSection').html('<div class="alert alert-danger fade in" style="margin:0; padding:5px;"><button class="close" data-dismiss="alert">×</button>' + err.Message + '</div>');
+                            $("#login-btn").html('Нэвтрэх');
+                            $("#login-btn").prop('disabled', false);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
